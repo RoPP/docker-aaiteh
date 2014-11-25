@@ -1,0 +1,10 @@
+[unit]
+Description=Auto add ip address of new container in hosts file
+After=docker.socket
+Requires=docker.socket
+
+[Service]
+ExecStart=/usr/local/bin/docker-aaiteh.py
+
+[Install]
+WantedBy=multi-user.target
