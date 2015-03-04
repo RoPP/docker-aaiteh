@@ -36,6 +36,13 @@ def update_hosts(status, name, ipaddress):
     write_etchosts(new_data)
 
 
+def process_container(container, status):
+    network_settings = container.get('NetworkSettings')
+    ipaddress = network_settings.get('IPAddress')
+    name = container.get('Name')
+    update_hosts(status, name, ipaddress)
+
+
 def bye(signal, frame):
     os.rename('/etc/hosts.origin', '/etc/hosts')
     sys.exit()
@@ -50,13 +57,13 @@ if __name__ == '__main__':
 
     client = docker.Client(base_url='unix://run/docker.sock')
 
+    # Process running containers
+    for c in client.containers():
+        process_container(client.inspect_container(c['Id']), c['Status'])
+
     for str_event in client.events():
         event = json.loads(str_event)
         status = event.get('status')
-        if status in ('start', 'die'):
+        if status in ('start', 'die', 'create'):
             container = client.inspect_container(event.get('id'))
-            network_settings = container.get('NetworkSettings')
-            ipaddress = network_settings.get('IPAddress')
-            name = container.get('Name')
-
-            update_hosts(status, name, ipaddress)
+            process_container(container, status)
