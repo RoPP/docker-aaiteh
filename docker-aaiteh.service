@@ -1,7 +1,7 @@
-[unit]
+[Unit]
 Description=Auto add ip address of new container in hosts file
 After=docker.socket
-Requires=docker.socket
+BindsTo=docker.socket
 
 [Service]
 ExecStart=/usr/local/bin/docker-aaiteh.py
