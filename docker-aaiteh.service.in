@@ -4,7 +4,7 @@ After=docker.socket
 BindsTo=docker.socket
 
 [Service]
-ExecStart=/usr/local/bin/docker-aaiteh.py
+ExecStart=@CMAKE_INSTALL_PREFIX@/bin/docker-aaiteh.py
 
 [Install]
 WantedBy=multi-user.target
