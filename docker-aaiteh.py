@@ -1,39 +1,40 @@
 #!/usr/bin/env python
 
 import sys
-import os
-import shutil
 import signal
 import json
 import docker
 
+START_TAG = "### Add by docker-aaiteh. Do not edit.\n"
+CONTAINERS = {}
+INITIAL = []
+
 
 def read_etchosts():
-    data = []
     with open('/etc/hosts') as hosts:
         for line in hosts:
-            data.append(line)
+            if line == START_TAG:
+                return
+            INITIAL.append(line)
 
-    return data
 
-
-def write_etchosts(data):
+def write_etchosts(data=[]):
     with open('/etc/hosts', 'w') as hosts:
+        hosts.writelines(INITIAL)
         hosts.writelines(data)
 
 
 def update_hosts(status, name, ipaddress):
     hostname = name.strip('/') + '.docker'
-    data = read_etchosts()
-    new_data = []
     if status == 'die':
-        for line in data:
-            if hostname not in line:
-                new_data.append(line)
+        CONTAINERS.pop(hostname)
     else:
-        new_data = data
-        new_data.append("%s\t%s\n" % (ipaddress, hostname))
-    write_etchosts(new_data)
+        CONTAINERS[hostname] = ipaddress
+
+    data = [START_TAG]
+    for h, i in CONTAINERS.items():
+        data.append("%s\t%s\n" % (i, h))
+    write_etchosts(data)
 
 
 def process_container(container, status):
@@ -44,17 +45,15 @@ def process_container(container, status):
 
 
 def bye(signal, frame):
-    os.rename('/etc/hosts.origin', '/etc/hosts')
+    write_etchosts()
     sys.exit()
 
 
 if __name__ == '__main__':
-
     signal.signal(signal.SIGINT, bye)
     signal.signal(signal.SIGTERM, bye)
 
-    shutil.copyfile('/etc/hosts', '/etc/hosts.origin')
-
+    read_etchosts()
     client = docker.Client(base_url='unix://run/docker.sock')
 
     # Process running containers
