@@ -10,18 +10,18 @@ Install [docker-py](https://github.com/docker/docker-py)
 
 For debian :
 ```shell
-sudo apt install cmake python-docker
+sudo apt install cmake python-docker unzip pkg-config
 ```
 
 ```shell
-wget https://github.com/RoPP/docker-aaiteh/archive/master.zip
-unzip master.zip
-cd docker-aaiteh-master
-mkdir build
-cd build
-cmake ..
-sudo make install
-sudo systemctl enable docker-aaiteh.service
+wget https://github.com/RoPP/docker-aaiteh/archive/master.zip && \
+unzip master.zip && \
+cd docker-aaiteh-master && \ 
+mkdir build && \
+cd build && \
+cmake .. && \
+sudo make install && \
+sudo systemctl enable docker-aaiteh.service && \
 sudo systemctl start docker-aaiteh.service
 ```
 
